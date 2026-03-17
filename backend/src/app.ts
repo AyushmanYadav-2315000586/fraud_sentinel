@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
-import db from "./config/db.js";
-import { users } from "./schema/user.schema.js";
+import db from "./config/db";
+import { users } from "./schema/user.schema";
+import userRoutes from "./routes/user.routes";
+import transactionRoutes from "./routes/transaction.routes";
 
 // Create an instance of the Express application
 const app: any = express();
@@ -21,11 +23,18 @@ app.use(
 /**
  * Routes for API endpoints will be defined here.
  */
+
+app.use("/users", userRoutes);
+app.use("/transactions", transactionRoutes);
+
+
+
+
 app.get("/", (req: any, res: any) => {
   res.send("Welcome to Fraud Sentinel API..");
 });
 
-app.get("/db-test", async (req:any, res:any) => {
+app.get("/db-test", async (req: any, res: any) => {
   try {
     const result = await db.execute("SELECT 1");
     res.json({ success: true, result });
@@ -34,13 +43,13 @@ app.get("/db-test", async (req:any, res:any) => {
   }
 });
 
-app.get("/test-insert", async (req:any, res:any) => {
+app.get("/test-insert", async (req: any, res: any) => {
   try {
     await db.insert(users).values({
-        upiId: "8864809531@ptyes",
-        avgTransactionAmount: 500,
-        totalTransactions: 1,
-        knownDevices: ["IQOO NEO 6"]
+      upiId: "8864809531@ptyes",
+      avgTransactionAmount: 500,
+      totalTransactions: 1,
+      knownDevices: ["IQOO NEO 6"],
     });
     res.send("User inserted successfully");
   } catch (error) {
