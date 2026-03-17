@@ -1,6 +1,6 @@
 import { pgTable, text, integer, timestamp, foreignKey } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { users } from "./user.schema.js";
+import { users } from "./user.schema";
 
 
 export const transaction = pgTable("transaction", {
