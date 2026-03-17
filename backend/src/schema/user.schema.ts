@@ -1,7 +1,7 @@
 import { pgTable, text, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 
 export const users = pgTable('users', {
-	id: text("id").primaryKey(), // userId (string)
+	upiId: text("upi_id").primaryKey(), // userId (string)
 	avgTransactionAmount: integer("avg_transaction_amount").notNull().default(0),
 	totalTransactions: integer("total_transactions").notNull().default(0),
 
