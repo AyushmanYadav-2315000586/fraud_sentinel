@@ -2,6 +2,7 @@ import db from "../config/db";
 import { transaction } from "../schema/transaction.schema";
 import { users } from "../schema/user.schema";
 import { eq } from "drizzle-orm";
+import { calculateRisk } from "../services/riskEngine";
 
 export const createTransaction = async (req: any, res: any) => {
   try {
@@ -23,19 +24,27 @@ export const createTransaction = async (req: any, res: any) => {
       });
     }
 
+    const user = existingUser[0];
+    if (!user) {
+      return;
+    }
+
+    const riskResult = calculateRisk({
+      amount,
+      avgTransactionAmount: user.avgTransactionAmount,
+      knownDevices: Array.isArray(user.knownDevices) ? user.knownDevices : [],
+      deviceId,
+      lastTransactionTime: user.lastTransactionTime,
+    });
     await db.insert(transaction).values({
       userId,
       amount,
       deviceId,
       location,
-      riskScore: 0,
-      decision: "APPROVE",
+      riskScore: riskResult.riskScore,
+      decision: riskResult.decision,
     });
 
-    const user = existingUser[0];
-    if (!user) {
-      return;
-    }
     const newTotal = user?.totalTransactions + 1;
     const newAvg = Math.floor(
       (user.avgTransactionAmount * user.totalTransactions + amount) / newTotal,
@@ -66,7 +75,7 @@ export const createTransaction = async (req: any, res: any) => {
   } catch (err) {
     console.error(err);
 
-    res.status(501).json({
+    res.status(500).json({
       message: "Something went wrong",
     });
   }
